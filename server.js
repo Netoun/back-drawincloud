@@ -10,23 +10,23 @@ mongoose.connect(mongoDB)
 
 const schema = {
   properties: {
-    dataUrl: {
+    dataURL: {
       type: 'string'
     },
     date: {
       type: 'date'
     },
-    users: {
-      type: '[number]'
+    user: {
+      type: 'String'
     },
-    name: {
+    title: {
       type: 'String'
     }
   },
-  required: ['dataUrl', 'date', 'users', 'name']
+  required: ['dataURL', 'user', 'title']
 }
 
-// Broadcast all draw clicks.
+// Broadcast drawing
 app.io.route('drawClick', (req) => {
   req.io.broadcast('draw', {
     x: req.data.x,
@@ -36,6 +36,7 @@ app.io.route('drawClick', (req) => {
   })
 })
 
+// Save snapshot
 app.io.route('drawBase64', (req) => {
   const snapshot = new Snapshot(req.data)
   snapshot.save((err) => {
@@ -43,6 +44,35 @@ app.io.route('drawBase64', (req) => {
       req.io.broadcast('error', {
         error: err
       })
+  })
+})
+
+// Get all snapshot
+app.get('/snapshot', (req, res) => {
+  Snapshot.find((err, snapshot) => {
+    if (err)
+      res.send(err)
+    res.json(snapshot)
+  })
+})
+
+// Get ID snapshot
+app.get('/snapshot/:id', (req, res) => {
+  const id = req.params.id
+  Snapshot.findById(id, (err, snapshot) => {
+    if (err)
+      res.send(err)
+    res.json(snapshot)
+  })
+})
+
+// Get all snapshot from User
+app.get('/:userId/snapshot', (req, res) => {
+  const userId = req.params.userId
+  Snapshot.findOne({ user: userId }, (err, snapshot) => {
+    if (err)
+      res.send(err)
+    res.json(snapshot)
   })
 })
 
