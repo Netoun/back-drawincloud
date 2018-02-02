@@ -47,8 +47,14 @@ app.io.route('drawBase64', (req) => {
 })
 
 // Get all snapshot
+const sortUniqueTitle = (snapshot) => {
+  Object.keys(snapshot).map((key, index) => {
+    console.log(key)
+  })
+}
 app.get('/snapshot', (req, res) => {
-  Snapshot.find((err, snapshot) => {
+  Snapshot.find({}).sort({ date: 'desc' }).exec((err, snapshot) => {
+    const data = sortUniqueTitle(snapshot)
     if (err)
       res.send(err)
     res.json(snapshot)
@@ -64,6 +70,14 @@ app.get('/snapshot/:id', (req, res) => {
     res.json(snapshot)
   })
 })
+/*app.get('/snapshot/:id', (req, res) => {
+  const id = req.params.id
+  Snapshot.findById(id, (err, snapshot) => {
+    if (err)
+      res.send(err)
+    res.json(snapshot)
+  })
+})*/
 
 // Get all snapshot from User
 app.get('/:userId/snapshot', (req, res) => {
