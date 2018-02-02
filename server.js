@@ -1,10 +1,12 @@
 const mongoose = require('mongoose')
-const Snapchot = require('./app/model/snapshot')
+const bodyParser = require('body-parser')
+const app = require('express.io')()
+
+app.http().io()
+const Snapshot = require('./app/model/snapshot')
 
 const mongoDB = 'mongodb://127.0.0.1:27017/drawincloud'
-mongoose.connect(mongoDB, {
-  useMongoClient: true
-})
+mongoose.connect(mongoDB)
 
 const schema = {
   properties: {
@@ -14,45 +16,36 @@ const schema = {
     date: {
       type: 'date'
     },
-    user_id: {
-      type: 'number'
+    users: {
+      type: '[number]'
+    },
+    name: {
+      type: 'String'
     }
   },
-  required: ['dataUrl', 'date', 'user_id']
+  required: ['dataUrl', 'date', 'users', 'name']
 }
 
-
-app.route('api/snapshot')
-  .post(validate(schema), (req, res) => {
-    var snapshot = new Snapchot(req.body)
-    snapshot.save((err) => {
-      if (err)
-        res.send(err)
-      res.json({
-        snapshot: 'Snapchot created!'
-      })
-    })
+// Broadcast all draw clicks.
+app.io.route('drawClick', (req) => {
+  req.io.broadcast('draw', {
+    x: req.data.x,
+    y: req.data.y,
+    type: req.data.type,
+    color: req.data.color
   })
-  .get((req, res) => {
-    Snapchot.find((err, snapshot) => {
-      if (err)
-        res.send(err)
-      res.json(snapshot)
-    })
-  })
+})
 
-  (function () {
-    const io = require('socket.io').listen(4444)
-    io.sockets.on('connection', function (socket) {
-      socket.on('drawClick', function (data) {
-        socket.broadcast.emit('draw', {
-          x: data.x,
-          y: data.y,
-          type: data.type
-        })
+app.io.route('drawBase64', (req) => {
+  const snapshot = new Snapshot(req.data)
+  snapshot.save((err) => {
+    if (err)
+      req.io.broadcast('error', {
+        error: err
       })
-      socket.on('drawBase64', function (data) {
-        console.log(data.dataURL)
-      })
-    })
-  }).call(this)
+  })
+})
+
+app.listen(4444, () => {
+  console.log('App start')
+})
