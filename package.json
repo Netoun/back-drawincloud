@@ -18,12 +18,9 @@
   },
   "homepage": "https://github.com/Netoun/back-drawincloud#readme",
   "dependencies": {
-    "body-parser": "^1.18.2",
-    "connect": "^3.6.5",
     "coffee-script": "^1.12.7",
-    "express": "^4.16.2",
+    "connect": "^3.6.5",
     "express.io": "^1.1.13",
-    "mongoose": "^5.0.2",
-    "socket.io": "^2.0.4"
+    "mongoose": "^5.0.2"
   }
 }

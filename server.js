@@ -1,5 +1,4 @@
 const mongoose = require('mongoose')
-const bodyParser = require('body-parser')
 const app = require('express.io')()
 
 app.http().io()
