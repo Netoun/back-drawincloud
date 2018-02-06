@@ -46,18 +46,29 @@ app.io.route('drawBase64', (req) => {
   })
 })
 
-// Get all snapshot
-const sortUniqueTitle = (snapshot) => {
-  Object.keys(snapshot).map((key, index) => {
-    console.log(key)
-  })
+const filterUniqueTitle = (snapshots) => {
+  let _snapshots = {}
+  for (let i in snapshots) {
+    let snapshot = snapshots[i]
+    let key = snapshot.title
+    if (typeof _snapshots[key] == 'undefined' || ((new Date(snapshot.date)).getTime() > (new Date(_snapshots[key].date)).getTime())) {
+      _snapshots[key] = snapshot
+    }
+  }
+
+  let retSnap = []
+  for (let i in _snapshots) {
+    retSnap.push(_snapshots[i])
+  }
+  return retSnap
 }
+
+// Get most recent snapshot for each title
 app.get('/snapshot', (req, res) => {
-  Snapshot.find({}).sort({ date: 'desc' }).exec((err, snapshot) => {
-    const data = sortUniqueTitle(snapshot)
+  Snapshot.find((err, snapshot) => {
     if (err)
       res.send(err)
-    res.json(snapshot)
+    res.json(filterUniqueTitle(snapshot))
   })
 })
 
@@ -70,19 +81,13 @@ app.get('/snapshot/:id', (req, res) => {
     res.json(snapshot)
   })
 })
-/*app.get('/snapshot/:id', (req, res) => {
-  const id = req.params.id
-  Snapshot.findById(id, (err, snapshot) => {
-    if (err)
-      res.send(err)
-    res.json(snapshot)
-  })
-})*/
 
 // Get all snapshot from User
 app.get('/:userId/snapshot', (req, res) => {
   const userId = req.params.userId
-  Snapshot.findOne({ user: userId }, (err, snapshot) => {
+  Snapshot.findOne({
+    user: userId
+  }, (err, snapshot) => {
     if (err)
       res.send(err)
     res.json(snapshot)
