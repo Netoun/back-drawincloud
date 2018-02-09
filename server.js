@@ -25,6 +25,12 @@ const schema = {
   required: ['dataURL', 'user', 'title']
 }
 
+app.use(function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+
 // Broadcast drawing
 app.io.route('drawClick', (req) => {
   req.io.broadcast('draw', {
